@@ -1,29 +1,29 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  // Get references to signers
+  const [owner, randomPerson] = await hre.ethers.getSigners();
 
-  await greeter.deployed();
+  const Lottery = await hre.ethers.getContractFactory("Lottery");
+  const lottery = await Lottery.deploy();
 
-  console.log("Greeter deployed to:", greeter.address);
+  await lottery.deployed();
+
+  console.log("Lottery deployed to:", lottery.address);
+
+  // Deploy EmeraldToken
+  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
+  const emerald = await Emerald.deploy(1_000_000);
+
+  await emerald.deployed();
+
+  console.log("Emerald deployed to:", emerald.address);
+
+  console.log("Contracts deployed by:", owner.address);
+
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main()
   .then(() => process.exit(0))
   .catch((error) => {

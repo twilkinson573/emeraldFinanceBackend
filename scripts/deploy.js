@@ -5,11 +5,16 @@ const main = async () => {
   console.log('Deploying contracts with account: ', deployer.address);
   console.log('Account balance: ', accountBalance.toString());
 
-  const factory = await hre.ethers.getContractFactory('Greeter');
-  const portal = await factory.deploy("Scrah");
-  await portal.deployed();
+  const Lottery = await hre.ethers.getContractFactory("Lottery");
+  const lottery = await Lottery.deploy();
+  await lottery.deployed();
+  console.log("Lottery deployed to:", lottery.address);
 
-  console.log('Greeter address: ', portal.address);
+  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
+  const emerald = await Emerald.deploy(1_000_000);
+  await emerald.deployed();
+  console.log("Emerald deployed to:", emerald.address);
+
 };
 
 const runMain = async () => {
