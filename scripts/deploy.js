@@ -28,11 +28,8 @@ const main = async () => {
   // TRANSFER EMERALD TOKENS ===========================
 
   await em.transfer(lottery.address, totalEmeraldSupply);
-
+  
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
-
-
-  console.log("Check Lottery EMER balance:", await lottery.makeDeposit(20));
 };
 
 const runMain = async () => {

@@ -1,29 +1,54 @@
-const hre = require("hardhat");
+const main = async () => {
 
-async function main() {
+  // VARS =============================================
 
-  // Get references to signers
-  const [owner, randomPerson] = await hre.ethers.getSigners();
+  const [deployer, bobAddr] = await hre.ethers.getSigners();
+  const accountBalance = await deployer.getBalance();
+  const totalEmeraldSupply = 100_000_000;
+
+  console.log('Deploying contracts with account: ', deployer.address);
+  console.log('Account balance: ', accountBalance.toString());
+
+
+  // DEPLOY CONTRACTS =================================
+
+  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
+  const em = await Emerald.deploy(totalEmeraldSupply);
+  await em.deployed();
+
+  console.log("Emerald Token deployed to:", em.address);
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
-  const lottery = await Lottery.deploy();
-
+  const lottery = await Lottery.deploy(em.address);
   await lottery.deployed();
 
   console.log("Lottery deployed to:", lottery.address);
 
-  console.log("Contracts deployed by:", owner.address);
 
-  const bal = await lottery.checkHisBalance();
-  console.log("Cheese:", bal);
+  // TRANSFER EMERALD TOKENS ===========================
 
-  console.log("Total supply");
+  await em.transfer(lottery.address, totalEmeraldSupply);
 
-}
+  console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
+
+  console.log("Bob making deposit...");
+  depositTxn = await lottery.connect(bobAddr).makeDeposit(50_000_000);
+  await depositTxn.wait();
+
+  console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
+  console.log("Bob's EMER balance:", await em.balanceOf(bobAddr.address));
+
+};
+
+const runMain = async () => {
+  try {
+    await main();
+    process.exit(0);
+  } catch (error) {
     console.error(error);
     process.exit(1);
-  });
+  }
+};
+
+runMain();

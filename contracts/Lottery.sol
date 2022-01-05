@@ -2,7 +2,6 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./EmeraldToken.sol";
 
@@ -16,14 +15,9 @@ contract Lottery {
   }
 
   function makeDeposit(uint256 amount) public returns (string memory) {
-    // console.log("Emerald tokens held by Lottery:", emer.balanceOf(msg.sender));
-    // return emer.balanceOf(address(this));
-    console.log(emer.name());
+    // TODO - add logic to give user some EMER tokens (for now for free, later we add payment in USDC)
+    emer.transfer(msg.sender, amount);
     return emer.name();
-
-    // return _emer.totalSupply();
-    // return _emer.totalSupply();
-
   }
 
 }
