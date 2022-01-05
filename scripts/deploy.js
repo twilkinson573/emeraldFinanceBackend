@@ -19,7 +19,7 @@ const main = async () => {
   console.log("Emerald Token deployed to:", em.address);
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
-  const lottery = await Lottery.deploy();
+  const lottery = await Lottery.deploy(em.address);
   await lottery.deployed();
 
   console.log("Lottery deployed to:", lottery.address);
@@ -28,9 +28,12 @@ const main = async () => {
   // TRANSFER EMERALD TOKENS ===========================
 
   await em.transfer(lottery.address, totalEmeraldSupply);
-  
+
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
 
+
+  console.log("Check Lottery EMER balance:");
+  await lottery.makeDeposit(20)
 };
 
 const runMain = async () => {

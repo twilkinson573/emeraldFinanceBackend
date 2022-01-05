@@ -2,21 +2,21 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-
-import "./EmeraldToken.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Lottery {
 
-  EmeraldToken private _emer;
+  IERC20 public emer;
 
-  constructor() {
-  // constructor(EmeraldToken _emer) {
-    // _emer = ;
+  // pass EmeraldToken ERC20 address
+  constructor(address _emerAddress) {
+    emer = IERC20(_emerAddress);
   }
 
-  function checkHisBalance() public view returns (uint) {
-    console.log(msg.sender);
-    return _emer.balanceOf(msg.sender);
+  function makeDeposit(uint256 amount) public returns (uint256) {
+    // console.log("Emerald tokens held by Lottery:", emer.balanceOf(msg.sender));
+    return emer.balanceOf(msg.sender);
+
     // return _emer.totalSupply();
     // return _emer.totalSupply();
 
