@@ -1,19 +1,35 @@
 const main = async () => {
+
+  // VARS =============================================
+
   const [deployer] = await hre.ethers.getSigners();
   const accountBalance = await deployer.getBalance();
+  const totalEmeraldSupply = 100_000_000;
 
   console.log('Deploying contracts with account: ', deployer.address);
   console.log('Account balance: ', accountBalance.toString());
 
+
+  // DEPLOY CONTRACTS =================================
+
+  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
+  const em = await Emerald.deploy(totalEmeraldSupply);
+  await em.deployed();
+
+  console.log("Emerald Token deployed to:", em.address);
+
   const Lottery = await hre.ethers.getContractFactory("Lottery");
   const lottery = await Lottery.deploy();
   await lottery.deployed();
+
   console.log("Lottery deployed to:", lottery.address);
 
-  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
-  const emerald = await Emerald.deploy(1_000_000);
-  await emerald.deployed();
-  console.log("Emerald deployed to:", emerald.address);
+
+  // TRANSFER EMERALD TOKENS ===========================
+
+  await em.transfer(lottery.address, totalEmeraldSupply);
+  
+  console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
 
 };
 

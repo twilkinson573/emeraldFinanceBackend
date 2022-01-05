@@ -12,15 +12,12 @@ async function main() {
 
   console.log("Lottery deployed to:", lottery.address);
 
-  // Deploy EmeraldToken
-  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
-  const emerald = await Emerald.deploy(1_000_000);
-
-  await emerald.deployed();
-
-  console.log("Emerald deployed to:", emerald.address);
-
   console.log("Contracts deployed by:", owner.address);
+
+  const bal = await lottery.checkHisBalance();
+  console.log("Cheese:", bal);
+
+  console.log("Total supply");
 
 }
 
