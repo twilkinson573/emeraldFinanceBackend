@@ -33,13 +33,17 @@ contract Lottery is Ownable {
 
   // Deposits ============================================================
 
+  function approveERC20(uint256 approveAmount) public {
+    getAcceptedERC20(0).approve(address(this), approveAmount);
+    console.log("HELLO1", getAcceptedERC20(0).allowance(msg.sender, address(this)));
+  }
+
   function makeDeposit(uint256 amount) public {
-
-
     console.log("HELLO", getAcceptedERC20(0).totalSupply());
+    console.log("HELLO1", getAcceptedERC20(0).allowance(msg.sender, address(this)));
     console.log("Bob usdc:", getAcceptedERC20(0).balanceOf(msg.sender));
     // Currently throws: 'ERC20: transfer amount exceeds balance'
-    // getAcceptedERC20(0).transfer(address(this), amount);
+    // getAcceptedERC20(0).transferFrom(msg.sender, address(this), amount);
     console.log("Bob usdc:", getAcceptedERC20(0).balanceOf(msg.sender));
 
     // give them EMER in return

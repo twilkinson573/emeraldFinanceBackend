@@ -45,6 +45,11 @@ const main = async () => {
 
   // USER MAKES DEPOSIT ================================
 
+  console.log("Bob giving approval...");
+  approveTxn = await lottery.connect(bob).approveERC20(1_000_000);
+  await approveTxn.wait();
+
+
   console.log("Bob making deposit...");
   depositTxn = await lottery.connect(bob).makeDeposit(500);
   await depositTxn.wait();
