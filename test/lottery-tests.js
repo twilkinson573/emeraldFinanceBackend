@@ -3,11 +3,11 @@ const { ethers } = require("hardhat");
 
 describe("Lottery", () => {
 
-  let deployer, bobAddr, emerald, lottery; 
+  let deployer, bob, emerald, lottery; 
   let totalEmeraldSupply = 100_000_000;
 
   beforeEach(async () => {
-    [deployer, bobAddr] = await hre.ethers.getSigners();
+    [deployer, bob] = await hre.ethers.getSigners();
 
     const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
     emerald = await Emerald.deploy(totalEmeraldSupply);
@@ -26,7 +26,7 @@ describe("Lottery", () => {
       expect(await emerald.balanceOf(lottery.address)).to.equal(totalEmeraldSupply);
       expect(await emerald.balanceOf(emerald.address)).to.equal(0);
       expect(await emerald.balanceOf(deployer.address)).to.equal(0);
-      expect(await emerald.balanceOf(bobAddr.address)).to.equal(0);
+      expect(await emerald.balanceOf(bob.address)).to.equal(0);
 
       // expect(await greeter.greet()).to.equal("Hello, world!");
 
@@ -47,10 +47,10 @@ describe("Lottery", () => {
 
 
     it("Should credit the user the correct number of EMER tokens", async () => {
-      depositTxn = await lottery.connect(bobAddr).makeDeposit(500);
+      depositTxn = await lottery.connect(bob).makeDeposit(500);
       await depositTxn.wait();
 
-      expect(await emerald.balanceOf(bobAddr.address)).to.equal(500);
+      expect(await emerald.balanceOf(bob.address)).to.equal(500);
       expect(await emerald.balanceOf(lottery.address)).to.equal(totalEmeraldSupply - 500);
     });
 
@@ -58,7 +58,7 @@ describe("Lottery", () => {
 
   describe("#addAcceptedERC20", () => {
     it("Should only be callable by the owner", async () => {
-      await expect(lottery.connect(bobAddr).addAcceptedERC20("0x0000000000000000000000000000000000000001")).to.be.reverted;
+      await expect(lottery.connect(bob).addAcceptedERC20("0x0000000000000000000000000000000000000001")).to.be.reverted;
       await expect(lottery.connect(deployer).addAcceptedERC20("0x0000000000000000000000000000000000000001")).to.not.be.reverted;
     })
 

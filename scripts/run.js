@@ -2,7 +2,7 @@ const main = async () => {
 
   // VARS =============================================
 
-  const [deployer, bobAddr] = await hre.ethers.getSigners();
+  const [deployer, bob] = await hre.ethers.getSigners();
   const accountBalance = await deployer.getBalance();
   const totalEmeraldSupply = 100_000_000;
 
@@ -18,6 +18,12 @@ const main = async () => {
 
   console.log("Emerald Token deployed to:", em.address);
 
+  const Usdc = await hre.ethers.getContractFactory("ERC20Mock");
+  const usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
+  await usdc.deployed();
+
+  console.log("USDC deployed to:", em.address);
+
   const Lottery = await hre.ethers.getContractFactory("Lottery");
   const lottery = await Lottery.deploy(em.address);
   await lottery.deployed();
@@ -25,21 +31,23 @@ const main = async () => {
   console.log("Lottery deployed to:", lottery.address);
 
 
-  // TRANSFER EMERALD TOKENS ===========================
+  // SETUP =============================================
 
+  // Transfer Emerald Tokens to Lottery
   await em.transfer(lottery.address, totalEmeraldSupply);
-
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
 
+  // Fund Bob's account
+  await usdc.transfer(bob.address, 1000);
 
   // USER MAKES DEPOSIT ================================
 
   console.log("Bob making deposit...");
-  depositTxn = await lottery.connect(bobAddr).makeDeposit(500);
+  depositTxn = await lottery.connect(bob).makeDeposit(500);
   await depositTxn.wait();
 
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
-  console.log("Bob's EMER balance:", await em.balanceOf(bobAddr.address));
+  console.log("Bob's EMER balance:", await em.balanceOf(bob.address));
 
 };
 
