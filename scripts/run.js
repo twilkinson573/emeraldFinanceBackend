@@ -45,21 +45,22 @@ const main = async () => {
 
   // USER MAKES DEPOSIT ================================
 
-  console.log("Bob giving approval...");
-  // approveTxn = await lottery.connect(bob).approveERC20(1_000_000);
-  
+  console.log("Bob giving USDC approval to Lottery...");
+  // Note, how would I make this request happen in real life through a frontend?
   let approveTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
   await approveTxn.wait();
 
-  console.log("BOB usdc approve", await usdc.allowance(lottery.address, bob.address));
+  console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
 
-
-  console.log("Bob making deposit...");
+  console.log("Bob making USDC deposit to Lottery...");
   let depositTxn = await lottery.connect(bob).makeDeposit(500);
   await depositTxn.wait();
 
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
   console.log("Bob's EMER balance:", await em.balanceOf(bob.address));
+
+  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
+  console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
 
 };
 

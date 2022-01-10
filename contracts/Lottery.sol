@@ -33,24 +33,12 @@ contract Lottery is Ownable {
 
   // Deposits ============================================================
 
-  function approveERC20(uint256 approveAmount) public {
-    // console.log("Checkit", getAcceptedERC20(0).name());
-    console.log("HELLO1", getAcceptedERC20(0).allowance(msg.sender, address(this)));
-    // Ah so the issue is Bob has got to call this method himself directly? 
-    // Otherwise we could just give ourselves unlimited approval on the backend
-    getAcceptedERC20(0).approve(address(this), approveAmount);
-    console.log("HELLO2", getAcceptedERC20(0).allowance(msg.sender, address(this)));
-  }
-
+  // todo - need to have request checks on this?
   function makeDeposit(uint256 amount) public {
-    console.log("HELLO3", getAcceptedERC20(0).totalSupply());
-    console.log("HELLO4", getAcceptedERC20(0).allowance(msg.sender, address(this)));
-    console.log("Bob usdc:", getAcceptedERC20(0).balanceOf(msg.sender));
-    // Currently throws: 'ERC20: transfer amount exceeds balance'
     getAcceptedERC20(0).transferFrom(msg.sender, address(this), amount);
-    console.log("Bob usdc:", getAcceptedERC20(0).balanceOf(msg.sender));
 
     // give them EMER in return
+    // todo - use SafeMath & multiply by 100 to give 1 EMER per cent
     emer.transfer(msg.sender, amount);
 
   }
