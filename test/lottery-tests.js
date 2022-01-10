@@ -21,23 +21,24 @@ describe("Lottery", () => {
   });
 
 
-  it("Should own the total supply of EMER tokens", async () => {
-    console.log(lottery.address)
-    expect(await emerald.balanceOf(lottery.address)).to.equal(totalEmeraldSupply);
-    expect(await emerald.balanceOf(emerald.address)).to.equal(0);
-    expect(await emerald.balanceOf(deployer.address)).to.equal(0);
-    expect(await emerald.balanceOf(bobAddr.address)).to.equal(0);
+  describe("#constructor", () => {
+    it("Should own the total supply of EMER tokens", async () => {
+      expect(await emerald.balanceOf(lottery.address)).to.equal(totalEmeraldSupply);
+      expect(await emerald.balanceOf(emerald.address)).to.equal(0);
+      expect(await emerald.balanceOf(deployer.address)).to.equal(0);
+      expect(await emerald.balanceOf(bobAddr.address)).to.equal(0);
 
-    // expect(await greeter.greet()).to.equal("Hello, world!");
+      // expect(await greeter.greet()).to.equal("Hello, world!");
 
-    // const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+      // const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
 
-    // // wait until the transaction is mined
-    // await setGreetingTx.wait();
+      // // wait until the transaction is mined
+      // await setGreetingTx.wait();
 
-    // expect(await greeter.greet()).to.equal("Hola, mundo!");
+      // expect(await greeter.greet()).to.equal("Hola, mundo!");
+    });
   });
-
+  
   describe("#makeDeposit", () => {
 
     it("Should let the user deposit in the correct amount of USDC", async () => {
@@ -55,4 +56,17 @@ describe("Lottery", () => {
 
   });
 
+  describe("#addAcceptedERC20", () => {
+    it("Should only be callable by the owner", async () => {
+      await expect(lottery.connect(bobAddr).addAcceptedERC20("0x0000000000000000000000000000000000000000")).to.be.reverted;
+      await expect(lottery.connect(deployer).addAcceptedERC20("0x0000000000000000000000000000000000000000")).to.not.be.reverted;
+    })
+  })
+
 });
+
+  // describe("#", () => {
+  //   it("xxx", async () => {
+      
+  //   })
+  // })

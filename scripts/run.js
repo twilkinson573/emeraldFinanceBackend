@@ -32,14 +32,17 @@ const main = async () => {
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
 
 
+  // USER MAKES DEPOSIT ================================
+
   console.log("Bob making deposit...");
-  depositTxn = await lottery.connect(bobAddr).makeDeposit(50_000_000);
+  depositTxn = await lottery.connect(bobAddr).makeDeposit(500);
   await depositTxn.wait();
 
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
   console.log("Bob's EMER balance:", await em.balanceOf(bobAddr.address));
 
 };
+
 
 const runMain = async () => {
   try {
