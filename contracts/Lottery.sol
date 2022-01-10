@@ -8,16 +8,29 @@ import "./EmeraldToken.sol";
 
 contract Lottery is Ownable {
 
-  EmeraldToken public emer;
+  EmeraldToken emer;
   address[] acceptedERC20s;
 
   constructor(EmeraldToken _emerAddress) {
     emer = _emerAddress;
   }
 
+  // #acceptedERC20 ======================================================
+
   function addAcceptedERC20(address newAddress) external onlyOwner {
     acceptedERC20s.push(newAddress);
   }
+
+  function getAcceptedERC20sCount() public view returns(uint addressCount) {
+    return acceptedERC20s.length;
+  } 
+
+  function getAcceptedERC20(uint i) public view returns (address) {
+    return acceptedERC20s[i];
+  }
+
+
+  // Deposits ============================================================
 
   function makeDeposit(uint256 amount) public returns (string memory) {
     // TODO - add logic to give user some EMER tokens (for now for free, later we add payment in USDC)

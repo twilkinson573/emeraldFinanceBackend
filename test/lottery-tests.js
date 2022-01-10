@@ -38,7 +38,7 @@ describe("Lottery", () => {
       // expect(await greeter.greet()).to.equal("Hola, mundo!");
     });
   });
-  
+
   describe("#makeDeposit", () => {
 
     it("Should let the user deposit in the correct amount of USDC", async () => {
@@ -58,9 +58,20 @@ describe("Lottery", () => {
 
   describe("#addAcceptedERC20", () => {
     it("Should only be callable by the owner", async () => {
-      await expect(lottery.connect(bobAddr).addAcceptedERC20("0x0000000000000000000000000000000000000000")).to.be.reverted;
-      await expect(lottery.connect(deployer).addAcceptedERC20("0x0000000000000000000000000000000000000000")).to.not.be.reverted;
+      await expect(lottery.connect(bobAddr).addAcceptedERC20("0x0000000000000000000000000000000000000001")).to.be.reverted;
+      await expect(lottery.connect(deployer).addAcceptedERC20("0x0000000000000000000000000000000000000001")).to.not.be.reverted;
     })
+
+    it("Should add the address to #acceptedERC20s", async () => {
+      expect(await lottery.getAcceptedERC20sCount()).to.equal(0);
+
+      const txn = await lottery.connect(deployer).addAcceptedERC20("0x0000000000000000000000000000000000000001");
+      await txn.wait();
+
+      expect(await lottery.getAcceptedERC20sCount()).to.equal(1);
+      expect(await lottery.getAcceptedERC20(0)).to.equal("0x0000000000000000000000000000000000000001");
+    })
+
   })
 
 });
