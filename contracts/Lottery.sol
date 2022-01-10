@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 import "./EmeraldToken.sol";
@@ -9,7 +10,7 @@ import "./EmeraldToken.sol";
 contract Lottery is Ownable {
 
   EmeraldToken emer;
-  address[] acceptedERC20s;
+  IERC20[] acceptedERC20s;
 
   constructor(EmeraldToken _emerAddress) {
     emer = _emerAddress;
@@ -18,28 +19,32 @@ contract Lottery is Ownable {
   // #acceptedERC20 ======================================================
 
   function addAcceptedERC20(address newAddress) external onlyOwner {
-    acceptedERC20s.push(newAddress);
+    acceptedERC20s.push(IERC20(newAddress));
   }
 
   function getAcceptedERC20sCount() public view returns(uint addressCount) {
     return acceptedERC20s.length;
   } 
 
-  function getAcceptedERC20(uint i) public view returns (address) {
+  function getAcceptedERC20(uint i) public view returns (IERC20) {
     return acceptedERC20s[i];
   }
 
 
   // Deposits ============================================================
 
-  function makeDeposit(uint256 amount) public returns (string memory) {
-    // TODO - add logic to give user some EMER tokens (for now for free, later we add payment in USDC)
-
-    // let user deposit USDC
+  function makeDeposit(uint256 amount) public {
 
 
+    console.log("HELLO", getAcceptedERC20(0).totalSupply());
+    console.log("Bob usdc:", getAcceptedERC20(0).balanceOf(msg.sender));
+    // Currently throws: 'ERC20: transfer amount exceeds balance'
+    // getAcceptedERC20(0).transfer(address(this), amount);
+    console.log("Bob usdc:", getAcceptedERC20(0).balanceOf(msg.sender));
+
+    // give them EMER in return
     emer.transfer(msg.sender, amount);
-    return emer.name();
+
   }
 
 }

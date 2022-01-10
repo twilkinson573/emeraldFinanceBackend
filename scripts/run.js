@@ -22,7 +22,7 @@ const main = async () => {
   const usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
   await usdc.deployed();
 
-  console.log("USDC deployed to:", em.address);
+  console.log("USDC deployed to:", usdc.address);
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
   const lottery = await Lottery.deploy(em.address);
@@ -39,6 +39,9 @@ const main = async () => {
 
   // Fund Bob's account
   await usdc.transfer(bob.address, 1000);
+
+  // Add USDC to Lottery#acceptedERC20s
+  await lottery.addAcceptedERC20(usdc.address);
 
   // USER MAKES DEPOSIT ================================
 
