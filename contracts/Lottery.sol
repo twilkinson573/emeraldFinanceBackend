@@ -17,7 +17,7 @@ contract Lottery is Ownable {
   }
 
 
-  // #acceptedERC20 ======================================================
+  // #acceptedERC20 =======================================================
 
   function addAcceptedERC20(address newAddress) external onlyOwner {
     acceptedERC20s.push(IERC20(newAddress));
@@ -32,14 +32,20 @@ contract Lottery is Ownable {
   }
 
 
-  // Deposits ============================================================
+  // Deposits & Withdrawals ===============================================
 
   function makeDeposit(uint256 amount) public {
     require(getAcceptedERC20(0).allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
     require(getAcceptedERC20(0).transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
     require(emer.transfer(msg.sender, amount * 100), "EMER Transfer failed");
+  }
 
+  function makeWithdrawal(uint256 amount) public {
+    require(emer.allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
+    require(emer.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+
+    require(getAcceptedERC20(0).transfer(msg.sender, amount / 100), "EMER Transfer failed");
   }
 
 }

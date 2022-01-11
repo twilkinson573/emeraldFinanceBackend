@@ -13,10 +13,10 @@ const main = async () => {
   // DEPLOY CONTRACTS =================================
 
   const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
-  const em = await Emerald.deploy(totalEmeraldSupply);
-  await em.deployed();
+  const emerald = await Emerald.deploy(totalEmeraldSupply);
+  await emerald.deployed();
 
-  console.log("Emerald Token deployed to:", em.address);
+  console.log("Emerald Token deployed to:", emerald.address);
 
   const Usdc = await hre.ethers.getContractFactory("ERC20Mock");
   const usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
@@ -25,7 +25,7 @@ const main = async () => {
   console.log("USDC deployed to:", usdc.address);
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
-  const lottery = await Lottery.deploy(em.address);
+  const lottery = await Lottery.deploy(emerald.address);
   await lottery.deployed();
 
   console.log("Lottery deployed to:", lottery.address);
@@ -34,11 +34,11 @@ const main = async () => {
   // SETUP =============================================
 
   // Transfer Emerald Tokens to Lottery
-  await em.transfer(lottery.address, totalEmeraldSupply);
-  console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
+  await emerald.transfer(lottery.address, totalEmeraldSupply);
+  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
 
   // Fund Bob's account
-  await usdc.transfer(bob.address, 1000);
+  await usdc.transfer(bob.address, 10_000);
 
   // Add USDC to Lottery#acceptedERC20s
   await lottery.addAcceptedERC20(usdc.address);
@@ -47,17 +47,36 @@ const main = async () => {
 
   console.log("Bob giving USDC approval to Lottery...");
   // Note, how would I make this request happen in real life through a frontend?
-  let approveTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
-  await approveTxn.wait();
+  let approveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
+  await approveUsdcTxn.wait();
 
   console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
 
   console.log("Bob making USDC deposit to Lottery...");
-  let depositTxn = await lottery.connect(bob).makeDeposit(400);
+  let depositTxn = await lottery.connect(bob).makeDeposit(4000);
   await depositTxn.wait();
 
-  console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));
-  console.log("Bob's EMER balance:", await em.balanceOf(bob.address));
+  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
+  console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
+
+  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
+  console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+
+  // USER MAKES WITHDRAWAL =============================
+
+  console.log("Bob giving EMER approval to Lottery...");
+  // Note, how would I make this request happen in real life through a frontend?
+  let approveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
+  await approveEmerTxn.wait();
+
+  console.log("BOB EMER approval amount", await emerald.allowance(bob.address, lottery.address));
+
+  console.log("Bob making small USDC withdrawal from Lottery...");
+  let withdrawTxn = await lottery.connect(bob).makeWithdrawal(1500);
+  await withdrawTxn.wait();
+
+  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
+  console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
 
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));

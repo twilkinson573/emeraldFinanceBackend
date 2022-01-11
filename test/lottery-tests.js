@@ -98,6 +98,10 @@ describe("Lottery", () => {
 
   });
 
+  decribe("#makeWithdrawal", () => {
+    
+  });
+
 });
 
   // describe("#", () => {
