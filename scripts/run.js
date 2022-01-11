@@ -53,7 +53,7 @@ const main = async () => {
   console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
 
   console.log("Bob making USDC deposit to Lottery...");
-  let depositTxn = await lottery.connect(bob).makeDeposit(500);
+  let depositTxn = await lottery.connect(bob).makeDeposit(400);
   await depositTxn.wait();
 
   console.log("Lottery EMER balance:", await em.balanceOf(lottery.address));

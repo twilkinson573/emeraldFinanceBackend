@@ -16,6 +16,7 @@ contract Lottery is Ownable {
     emer = _emerAddress;
   }
 
+
   // #acceptedERC20 ======================================================
 
   function addAcceptedERC20(address newAddress) external onlyOwner {
@@ -33,13 +34,11 @@ contract Lottery is Ownable {
 
   // Deposits ============================================================
 
-  // todo - need to have request checks on this?
   function makeDeposit(uint256 amount) public {
-    getAcceptedERC20(0).transferFrom(msg.sender, address(this), amount);
+    require(getAcceptedERC20(0).allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
+    require(getAcceptedERC20(0).transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
-    // give them EMER in return
-    // todo - use SafeMath & multiply by 100 to give 1 EMER per cent
-    emer.transfer(msg.sender, amount);
+    require(emer.transfer(msg.sender, amount * 100), "EMER Transfer failed");
 
   }
 
