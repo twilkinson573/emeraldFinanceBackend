@@ -19,15 +19,11 @@ const main = async () => {
 
   console.log("USDC deployed to:", usdc.address);
 
-  const BeefyStrat = await hre.ethers.getContractFactory("BeefyStrategyMock");
-  const beefyVault = await BeefyVault.deploy();
+  const BeefyVault = await hre.ethers.getContractFactory("VaultV6Mock");
+  const beefyVault = await BeefyVault.deploy("Moo USDC", "mooUSDC", usdc.address);
   await beefyVault.deployed();
 
-  const BeefyVault = await hre.ethers.getContractFactory("BeefyVaultV6Mock");
-  const beefyVault = await BeefyVault.deploy();
-  await beefyVault.deployed();
-
-  console.log("BeefyVaultV6 deployed to:", beefyVault.address);
+  console.log("BeefyVaultV6Mock deployed to: %s, with wantToken: %s", beefyVault.address, await beefyVault.want());
 
   const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
   const emerald = await Emerald.deploy(totalEmeraldSupply);
@@ -40,8 +36,6 @@ const main = async () => {
   await lottery.deployed();
 
   console.log("Lottery deployed to:", lottery.address);
-
-
 
 
   // SETUP =============================================

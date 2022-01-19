@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -14,9 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * This is the contract that receives funds and that users interface with.
  * The yield optimizing strategy itself is implemented in a separate 'Strategy.sol' contract.
  */
-contract VaultV6Mock is ERC20, Ownable, ReentrancyGuard {
-    using SafeERC20 for IERC20;
-    using SafeMath for uint256;
+contract VaultV6Mock is ERC20, Ownable {
 
     IERC20 public wantToken;
 
@@ -65,7 +60,7 @@ contract VaultV6Mock is ERC20, Ownable, ReentrancyGuard {
      * Returns an uint256 with 18 decimals of how much underlying asset one vault share represents.
      */
     function getPricePerFullShare() public view returns (uint256) {
-        return totalSupply() == 0 ? 1e18 : balance().mul(1e18).div(totalSupply());
+        return totalSupply() == 0 ? 1e18 : (balance() * 1e18) / (totalSupply());
     }
 
 
@@ -73,16 +68,16 @@ contract VaultV6Mock is ERC20, Ownable, ReentrancyGuard {
      * @dev The entrypoint of funds into the system. People deposit with this function
      * into the vault. The vault is then in charge of sending funds into the strategy.
      */
-    function deposit(uint _amount) public nonReentrant {
+    function deposit(uint _amount) public {
         uint256 _pool = balance();
         want().transferFrom(msg.sender, address(this), _amount);
         uint256 _after = balance();
-        _amount = _after.sub(_pool); // Additional check for deflationary tokens
+        _amount = _after - _pool; // Additional check for deflationary tokens
         uint256 shares = 0;
         if (totalSupply() == 0) {
             shares = _amount;
         } else {
-            shares = (_amount.mul(totalSupply())).div(_pool);
+            shares = (_amount * totalSupply()) / _pool;
         }
         _mint(msg.sender, shares);
     }
@@ -100,7 +95,7 @@ contract VaultV6Mock is ERC20, Ownable, ReentrancyGuard {
      * tokens are burned in the process.
      */
     function withdraw(uint256 _shares) public {
-        uint256 r = (balance().mul(_shares)).div(totalSupply());
+        uint256 r = (balance() * _shares) / totalSupply();
         _burn(msg.sender, _shares);
         require(want().transfer(msg.sender, r), "Withdraw failed");
     }
