@@ -12,11 +12,6 @@ const main = async () => {
 
   // DEPLOY CONTRACTS =================================
 
-  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
-  const emerald = await Emerald.deploy(totalEmeraldSupply);
-  await emerald.deployed();
-
-  console.log("Emerald Token deployed to:", emerald.address);
 
   const Usdc = await hre.ethers.getContractFactory("ERC20Mock");
   const usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
@@ -24,11 +19,29 @@ const main = async () => {
 
   console.log("USDC deployed to:", usdc.address);
 
+  const BeefyStrat = await hre.ethers.getContractFactory("BeefyStrategyMock");
+  const beefyVault = await BeefyVault.deploy();
+  await beefyVault.deployed();
+
+  const BeefyVault = await hre.ethers.getContractFactory("BeefyVaultV6Mock");
+  const beefyVault = await BeefyVault.deploy();
+  await beefyVault.deployed();
+
+  console.log("BeefyVaultV6 deployed to:", beefyVault.address);
+
+  const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
+  const emerald = await Emerald.deploy(totalEmeraldSupply);
+  await emerald.deployed();
+
+  console.log("Emerald Token deployed to:", emerald.address);
+
   const Lottery = await hre.ethers.getContractFactory("Lottery");
   const lottery = await Lottery.deploy(emerald.address);
   await lottery.deployed();
 
   console.log("Lottery deployed to:", lottery.address);
+
+
 
 
   // SETUP =============================================
@@ -81,6 +94,7 @@ const main = async () => {
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
 
+  console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
 };
 
 
