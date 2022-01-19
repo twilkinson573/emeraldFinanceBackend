@@ -32,13 +32,14 @@ const main = async () => {
   console.log("Emerald Token deployed to:", emerald.address);
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
-  const lottery = await Lottery.deploy(emerald.address);
+  const lottery = await Lottery.deploy(emerald.address, beefyVault.address);
   await lottery.deployed();
 
-  console.log("Lottery deployed to:", lottery.address);
+  console.log("Lottery deployed to: %s, with EMER token: %s, & yield vault: %s ", lottery.address, emerald.address, beefyVault.address);
 
 
   // SETUP =============================================
+
 
   // Transfer Emerald Tokens to Lottery
   await emerald.transfer(lottery.address, totalEmeraldSupply);
@@ -50,7 +51,9 @@ const main = async () => {
   // Add USDC to Lottery#acceptedERC20s
   await lottery.addAcceptedERC20(usdc.address);
 
+
   // USER MAKES DEPOSIT ================================
+
 
   console.log("Bob giving USDC approval to Lottery...");
   // Note, how would I make this request happen in real life through a frontend?
@@ -88,7 +91,7 @@ const main = async () => {
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
 
-  console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
+  console.log("BOB USDC approval amount to Lottery", await usdc.allowance(bob.address, lottery.address));
 };
 
 
