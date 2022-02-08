@@ -1,6 +1,6 @@
-# Emerald Finance
+# Emerald Finance ❇️
 
-## El Historia
+## La Historia
 
 * I heard the 2 sentence idea of Pool Together as an ad on a podcast and as an experiment I did no research and tried to build a project inspired by that core tokenomic idea completely from my own first principles - discovering issues, solutions, mechanics etc along the way without being influenced by what was already out there
 
