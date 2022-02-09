@@ -6,9 +6,8 @@ const main = async () => {
   const accountBalance = await deployer.getBalance();
   const totalEmeraldSupply = 100_000_000;
 
-  console.log('Deploying contracts with account: ', deployer.address);
-  console.log('Account balance: ', accountBalance.toString());
-
+  // console.log('Deploying contracts with account: ', deployer.address);
+  // console.log('Account balance: ', accountBalance.toString());
 
   // DEPLOY CONTRACTS =================================
 
@@ -17,25 +16,25 @@ const main = async () => {
   const usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
   await usdc.deployed();
 
-  console.log("USDC deployed to:", usdc.address);
+  // console.log("USDC deployed to:", usdc.address);
 
   const BeefyVault = await hre.ethers.getContractFactory("VaultV6Mock");
-  const beefyVault = await BeefyVault.deploy("Moo USDC", "mooUSDC", usdc.address); // Deploy BeefyVault with Moo USD as IOU token and USDC as want token
+  const beefyVault = await BeefyVault.deploy("Moo Scream USDC", "mooScreamUSDC", usdc.address); // Deploy BeefyVault with Moo Scream USD as IOU token and USDC as want token
   await beefyVault.deployed();
 
-  console.log("BeefyVaultV6Mock deployed to: %s, with wantToken: %s", beefyVault.address, await beefyVault.want());
+  // console.log("BeefyVaultV6Mock deployed to: %s, with wantToken: %s", beefyVault.address, await beefyVault.want());
 
   const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
   const emerald = await Emerald.deploy(totalEmeraldSupply);
   await emerald.deployed();
 
-  console.log("Emerald Token deployed to:", emerald.address);
+  // console.log("Emerald Token deployed to:", emerald.address);
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
   const lottery = await Lottery.deploy(emerald.address, beefyVault.address);
   await lottery.deployed();
 
-  console.log("Lottery deployed to: %s, with EMER token: %s, & yield vault: %s ", lottery.address, emerald.address, beefyVault.address);
+  // console.log("Lottery deployed to: %s, with EMER token: %s, & yield vault: %s ", lottery.address, emerald.address, beefyVault.address);
 
 
   // SETUP =============================================
@@ -43,11 +42,11 @@ const main = async () => {
 
   // Transfer Emerald Tokens to Lottery
   await emerald.transfer(lottery.address, totalEmeraldSupply);
-  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
+  // console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
 
   // Fund Bob's account
-  let bobFundingAmount = 10_000;
-  console.log(`Funding Bob's account with ${bobFundingAmount} USDC...`);
+  const bobFundingAmount = 10_000;
+  // console.log(`Funding Bob's account with ${bobFundingAmount} USDC...`);
   await usdc.transfer(bob.address, bobFundingAmount);
 
   // Add USDC to Lottery#acceptedERC20s
@@ -56,45 +55,55 @@ const main = async () => {
 
   // USER MAKES DEPOSIT ================================
 
-  console.log(" ")
-  console.log("## TX 1: Bob giving USDC approval to Lottery...");
-  // Note, how would I make this request happen in real life through a frontend?
-  let approveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
+  const approveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
   await approveUsdcTxn.wait();
 
-  console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
+  console.log(" ");
+  let beefyVaultBalance = await beefyVault.balance();
+  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
+  let beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
+  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
 
 
   console.log(" ")
-  let bobDepositAmount = 4000;
-  console.log(`## TX 2: Bob making USDC deposit of ${bobDepositAmount} to Lottery...`);
-  let depositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
+  const bobDepositAmount = 4000;
+  console.log(`## TX: Bob making USDC deposit of ${bobDepositAmount} to Lottery...`);
+  const depositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
   await depositTxn.wait();
+
 
   console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
 
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
-  console.log("Lottery's mooUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
+  console.log("Lottery's mooScreamUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
 
   console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
 
+  console.log(" ");
+  beefyVaultBalance = await beefyVault.balance();
+  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
+  beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
+  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
 
   // USER MAKES WITHDRAWAL =============================
 
-  console.log(" ")
-  console.log("## TX 3: Bob giving EMER approval to Lottery...");
-  // Note, how would I make this request happen in real life through a frontend?
-  let approveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
+  console.log("USDC is deposited into BeefyVault by strategy");
+  // await usdc.transfer(beefyVault.address, 10_000);
+
+  console.log(" ");
+  beefyVaultBalance = await beefyVault.balance();
+  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
+  beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
+  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
+  const approveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
   await approveEmerTxn.wait();
 
-  console.log("BOB EMER approval amount", await emerald.allowance(bob.address, lottery.address));
-
   console.log(" ")
-  let bobWithdrawalAmount = 2000;
-  console.log(`## TX 4: Bob making a small USDC withdrawal of ${bobWithdrawalAmount} from Lottery...`);
-  let withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
+  const bobWithdrawalAmount = 2000;
+  console.log(`## TX: Bob making a small USDC withdrawal of ${bobWithdrawalAmount} from Lottery...`);
+  const withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
   await withdrawTxn.wait();
 
   console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
@@ -102,9 +111,15 @@ const main = async () => {
 
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
-  console.log("Lottery's mooUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
+  console.log("Lottery's mooScreamUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
 
   console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
+
+  console.log(" ");
+  beefyVaultBalance = await beefyVault.balance();
+  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
+  beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
+  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
 
 };
 
