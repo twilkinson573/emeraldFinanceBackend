@@ -20,7 +20,7 @@ const main = async () => {
   console.log("USDC deployed to:", usdc.address);
 
   const BeefyVault = await hre.ethers.getContractFactory("VaultV6Mock");
-  const beefyVault = await BeefyVault.deploy("Moo USDC", "mooUSDC", usdc.address);
+  const beefyVault = await BeefyVault.deploy("Moo USDC", "mooUSDC", usdc.address); // Deploy BeefyVault with Moo USD as IOU token and USDC as want token
   await beefyVault.deployed();
 
   console.log("BeefyVaultV6Mock deployed to: %s, with wantToken: %s", beefyVault.address, await beefyVault.want());
@@ -46,7 +46,9 @@ const main = async () => {
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
 
   // Fund Bob's account
-  await usdc.transfer(bob.address, 10_000);
+  let bobFundingAmount = 10_000;
+  console.log(`Funding Bob's account with ${bobFundingAmount} USDC...`);
+  await usdc.transfer(bob.address, bobFundingAmount);
 
   // Add USDC to Lottery#acceptedERC20s
   await lottery.addAcceptedERC20(usdc.address);
@@ -54,16 +56,18 @@ const main = async () => {
 
   // USER MAKES DEPOSIT ================================
 
-
-  console.log("Bob giving USDC approval to Lottery...");
+  console.log(" ")
+  console.log("## TX 1: Bob giving USDC approval to Lottery...");
   // Note, how would I make this request happen in real life through a frontend?
   let approveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
   await approveUsdcTxn.wait();
 
   console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
 
-  console.log("Bob making USDC deposit to Lottery...");
-  let depositTxn = await lottery.connect(bob).makeDeposit(4000);
+  console.log(" ")
+  let bobDepositAmount = 4000;
+  console.log(`## TX 2: Bob making USDC deposit of ${bobDepositAmount} to Lottery...`);
+  let depositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
   await depositTxn.wait();
 
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
@@ -71,18 +75,22 @@ const main = async () => {
 
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+  console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
 
   // USER MAKES WITHDRAWAL =============================
 
-  console.log("Bob giving EMER approval to Lottery...");
+  console.log(" ")
+  console.log("## TX 3: Bob giving EMER approval to Lottery...");
   // Note, how would I make this request happen in real life through a frontend?
   let approveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
   await approveEmerTxn.wait();
 
   console.log("BOB EMER approval amount", await emerald.allowance(bob.address, lottery.address));
 
-  console.log("Bob making small USDC withdrawal from Lottery...");
-  let withdrawTxn = await lottery.connect(bob).makeWithdrawal(1500);
+  console.log(" ")
+  let bobWithdrawalAmount = 2000;
+  console.log(`## TX 4: Bob making a small USDC withdrawal of ${bobWithdrawalAmount} from Lottery...`);
+  let withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
   await withdrawTxn.wait();
 
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
@@ -90,8 +98,8 @@ const main = async () => {
 
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+  console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
 
-  console.log("BOB USDC approval amount to Lottery", await usdc.allowance(bob.address, lottery.address));
 };
 
 

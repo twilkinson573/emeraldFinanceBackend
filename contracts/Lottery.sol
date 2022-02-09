@@ -53,9 +53,9 @@ contract Lottery is Ownable {
     // require(_withdrawFromVault(_amount), "Withdraw from vault failed");
     _withdrawFromVault(_amount);
     require(_emer.allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
-    require(_emer.transferFrom(msg.sender, address(this), _amount), "Transfer failed");
+    require(_emer.transferFrom(msg.sender, address(this), _amount * 100), "Transfer failed");
 
-    require(getAcceptedERC20(0).transfer(msg.sender, _amount / 100), "ERC20 Transfer failed");
+    require(getAcceptedERC20(0).transfer(msg.sender, _amount), "ERC20 Transfer failed");
   }
 
 
@@ -66,7 +66,6 @@ contract Lottery is Ownable {
   }
 
   function _withdrawFromVault(uint256 _shares) internal {
-    console.log("yo", IVaultV6(_yieldVaultAddress).balance());
     IVaultV6(_yieldVaultAddress).withdraw(_shares);
   }
 
