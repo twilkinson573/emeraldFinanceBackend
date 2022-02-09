@@ -64,18 +64,22 @@ const main = async () => {
 
   console.log("BOB USDC approval amount", await usdc.allowance(bob.address, lottery.address));
 
+
   console.log(" ")
   let bobDepositAmount = 4000;
   console.log(`## TX 2: Bob making USDC deposit of ${bobDepositAmount} to Lottery...`);
   let depositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
   await depositTxn.wait();
 
-  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
   console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
-
-  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+
+  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
+  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
+  console.log("Lottery's mooUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
+
   console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
+
 
   // USER MAKES WITHDRAWAL =============================
 
@@ -93,11 +97,13 @@ const main = async () => {
   let withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
   await withdrawTxn.wait();
 
-  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
   console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
-
-  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+
+  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
+  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
+  console.log("Lottery's mooUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
+
   console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
 
 };
