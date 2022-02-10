@@ -19,31 +19,14 @@ describe("Lottery", () => {
     beefyVault = await BeefyVault.deploy("Moo Scream USDC", "mooScreamUSDC", usdc.address); // Deploy BeefyVault with Moo Scream USD as IOU token and USDC as want token
     await beefyVault.deployed();
 
-    const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
-    emerald = await Emerald.deploy(totalEmeraldSupply);
-    await emerald.deployed();
-
     const Lottery = await hre.ethers.getContractFactory("Lottery");
-    lottery = await Lottery.deploy(emerald.address, beefyVault.address);
+    lottery = await Lottery.deploy(beefyVault.address);
     await lottery.deployed();
 
-
     // SETUP =============================================
-    await emerald.transfer(lottery.address, totalEmeraldSupply);
     await lottery.addAcceptedERC20(usdc.address);
     await usdc.transfer(bob.address, 10_000);
 
-  });
-
-
-  describe("#constructor", () => {
-    it("Should own the total supply of EMER tokens", async () => {
-      expect(await emerald.balanceOf(lottery.address)).to.equal(totalEmeraldSupply);
-      expect(await emerald.balanceOf(emerald.address)).to.equal(0);
-      expect(await emerald.balanceOf(deployer.address)).to.equal(0);
-      expect(await emerald.balanceOf(bob.address)).to.equal(0);
-
-    });
   });
 
   describe("#addAcceptedERC20", () => {
