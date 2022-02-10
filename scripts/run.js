@@ -80,9 +80,6 @@ const main = async () => {
 
   await showBeefyStats(beefyVault);
 
-  // const bobApproveEmerTxn = await lottery.connect(bob).approve(lottery.address, 1_000_000);
-  // await bobApproveEmerTxn.wait();
-
   console.log(" ")
   const bobWithdrawalAmount = 2000;
   console.log(`########## TX: Bob withdraw ${bobWithdrawalAmount} USDC from Lottery...`);
@@ -104,7 +101,7 @@ async function showRetailStats (name, retailUser, lottery, usdc) {
 
 async function showLotteryStats (lottery, usdc, beefyVault) {
   console.log(" ");
-  console.log("Lottery EMER balance:", await lottery.balanceOf(lottery.address));
+  console.log("Lottery total supply of EMER:", await lottery.totalSupply());
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Lottery IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
 }

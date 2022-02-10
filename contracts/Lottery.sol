@@ -14,7 +14,7 @@ contract Lottery is ERC20, Ownable {
   address _yieldVaultAddress;
 
   // Create Emer token inline
-  constructor(address _initialYieldVaultAddress) public ERC20("EmeraldToken", "EMER") {
+  constructor(address _initialYieldVaultAddress) ERC20("EmeraldToken", "EMER") {
     _yieldVaultAddress = _initialYieldVaultAddress;
   }
 
