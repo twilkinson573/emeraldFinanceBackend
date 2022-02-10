@@ -6,57 +6,70 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 import "./EmeraldToken.sol";
+import "./interfaces/beefy/IVaultV6.sol";
 
 contract Lottery is Ownable {
 
-  EmeraldToken emer;
-  IERC20[] acceptedERC20s;
+  EmeraldToken _emer;
+  IERC20[] _acceptedERC20s;
+  address _yieldVaultAddress;
 
-  constructor(EmeraldToken _emerAddress) {
-    emer = _emerAddress;
+  constructor(address _emerAddress, address _initialYieldVaultAddress) {
+    _emer = EmeraldToken(_emerAddress);
+    _yieldVaultAddress = _initialYieldVaultAddress;
   }
 
 
-  // #acceptedERC20 =======================================================
+  // #acceptedERC20 ===========================================================
 
-  function addAcceptedERC20(address newAddress) external onlyOwner {
-    acceptedERC20s.push(IERC20(newAddress));
+  function addAcceptedERC20(address _newAddress) external onlyOwner {
+    _acceptedERC20s.push(IERC20(_newAddress));
   }
 
   function getAcceptedERC20sCount() public view returns(uint addressCount) {
-    return acceptedERC20s.length;
+    return _acceptedERC20s.length;
   } 
 
-  function getAcceptedERC20(uint i) public view returns (IERC20) {
-    return acceptedERC20s[i];
+  function getAcceptedERC20(uint _i) public view returns (IERC20) {
+    return _acceptedERC20s[_i];
   }
 
 
-  // Deposits & Withdrawals ===============================================
+  // Deposits & Withdrawals ===================================================
 
-  function makeDeposit(uint256 amount) public {
-    require(getAcceptedERC20(0).allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
-    require(getAcceptedERC20(0).transferFrom(msg.sender, address(this), amount), "Transfer failed");
+  function makeDeposit(uint256 _amount) public {
+    require(getAcceptedERC20(0).allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
+    require(getAcceptedERC20(0).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
 
-    require(emer.transfer(msg.sender, amount * 100), "EMER Transfer failed");
+    require(_emer.transfer(msg.sender, _amount * 100), "EMER Transfer failed");
+
+    getAcceptedERC20(0).approve(_yieldVaultAddress, _amount);
+    _depositToVault(_amount);
+    // require(_depositToVault(_amount), "Deposit to vault failed");
   }
 
-  function makeWithdrawal(uint256 amount) public {
-    require(emer.allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
-    require(emer.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+  function makeWithdrawal(uint256 _amount) public {
+    // Todo - probably need some calculations to work out what proportions of our mooToken vault shares we need to cash in
+    // require(_withdrawFromVault(_amount), "Withdraw from vault failed");
+    _withdrawFromVault(_amount);
+    require(_emer.allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
+    require(_emer.transferFrom(msg.sender, address(this), _amount * 100), "Transfer failed");
 
-    require(getAcceptedERC20(0).transfer(msg.sender, amount / 100), "EMER Transfer failed");
+    require(getAcceptedERC20(0).transfer(msg.sender, _amount), "ERC20 Transfer failed");
+  }
+
+
+  // Yield Farming ============================================================
+
+  function _depositToVault(uint256 _amount) internal {
+    IVaultV6(_yieldVaultAddress).deposit(_amount);
+  }
+
+  function _withdrawFromVault(uint256 _shares) internal {
+    IVaultV6(_yieldVaultAddress).withdraw(_shares);
   }
 
 }
 
-
-// 1. Make Lottery Ownable
-// 2. Add a state data structure to store the appropriate ERC20 addresses that we accept (for now just USDC but this makes it possible to add more in future)
-  // we need an #addAcceptedToken too
-  // we don't need a struct to hold 
-// 3, Create a dummy interface for an ERC20 token (or just use IERC20 pre-made from OpenZep??)
-// 4. Accept that ERC20 token in #makeDeposit (do we have to get allowance? Check Sushi code/tutorals)
-// 5. For now just return 1 EMER per cent (in future use Chainlink oracle to get actual price and return 1 EMER per cent of other assets)
 
 // ?a. How to we give different reciepts per different ERC20 supplied? In future we'd need different EMER receipt tokens or something
