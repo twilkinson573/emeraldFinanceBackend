@@ -54,23 +54,34 @@ const main = async () => {
 
   // USER MAKES DEPOSIT ================================
 
-  const approveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
-  await approveUsdcTxn.wait();
+  const bobApproveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
+  await bobApproveUsdcTxn.wait();
+  const janeApproveUsdcTxn = await usdc.connect(jane).approve(lottery.address, 1_000_000);
+  await janeApproveUsdcTxn.wait();
 
   await showBeefyStats(beefyVault);
 
   console.log(" ")
   const bobDepositAmount = 4000;
   console.log(`########## TX: Bob deposit ${bobDepositAmount} USDC to Lottery...`);
-  const depositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
-  await depositTxn.wait();
-
+  const bobDepositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
+  await bobDepositTxn.wait();
 
   await showRetailStats("Bob", bob, emerald, usdc);
   await showRetailStats("Jane", jane, emerald, usdc);
-
   await showLotteryStats(lottery, emerald, usdc, beefyVault);
+  await showBeefyStats(beefyVault);
 
+
+  console.log(" ")
+  const janeDepositAmount = 1000;
+  console.log(`########## TX: Jane deposit ${janeDepositAmount} USDC to Lottery...`);
+  const janeDepositTxn = await lottery.connect(jane).makeDeposit(janeDepositAmount);
+  await janeDepositTxn.wait();
+
+  await showRetailStats("Bob", bob, emerald, usdc);
+  await showRetailStats("Jane", jane, emerald, usdc);
+  await showLotteryStats(lottery, emerald, usdc, beefyVault);
   await showBeefyStats(beefyVault);
 
   // USER MAKES WITHDRAWAL =============================
@@ -81,8 +92,8 @@ const main = async () => {
 
   await showBeefyStats(beefyVault);
 
-  const approveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
-  await approveEmerTxn.wait();
+  const bobApproveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
+  await bobApproveEmerTxn.wait();
 
   console.log(" ")
   const bobWithdrawalAmount = 2000;
@@ -92,9 +103,7 @@ const main = async () => {
 
   await showRetailStats("Bob", bob, emerald, usdc);
   await showRetailStats("Jane", jane, emerald, usdc);
-
   await showLotteryStats(lottery, emerald, usdc, beefyVault);
-
   await showBeefyStats(beefyVault);
 
 };
@@ -109,12 +118,13 @@ async function showLotteryStats (lottery, emerald, usdc, beefyVault) {
   console.log(" ");
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
-  console.log("Lottery's mooScreamUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
+  console.log("Lottery IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
 }
 
 async function showBeefyStats (beefyVault) {
   console.log(" ");
   console.log("BeefyVault USDC reserve balance", await beefyVault.balance());
+  console.log("BeefyVault IOU Token TotalSupply", await beefyVault.totalSupply());
   console.log("BeefyVault Price Per Full IOU Token Share", await beefyVault.getPricePerFullShare());
 }
 
