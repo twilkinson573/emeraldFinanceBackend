@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("Lottery", () => {
 
-  let deployer, bob, emerald, lottery, usdc; 
+  let deployer, bob, emerald, lottery, usdc, beefyVault; 
   let totalEmeraldSupply = 100_000_000;
 
   beforeEach(async () => {
@@ -11,17 +11,22 @@ describe("Lottery", () => {
 
     // DEPLOY CONTRACTS =================================
 
+    const Usdc = await hre.ethers.getContractFactory("ERC20Mock");
+    usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
+    await usdc.deployed();
+
+    const BeefyVault = await hre.ethers.getContractFactory("VaultV6Mock");
+    beefyVault = await BeefyVault.deploy("Moo Scream USDC", "mooScreamUSDC", usdc.address); // Deploy BeefyVault with Moo Scream USD as IOU token and USDC as want token
+    await beefyVault.deployed();
+
     const Emerald = await hre.ethers.getContractFactory("EmeraldToken");
     emerald = await Emerald.deploy(totalEmeraldSupply);
     await emerald.deployed();
 
     const Lottery = await hre.ethers.getContractFactory("Lottery");
-    lottery = await Lottery.deploy(emerald.address);
+    lottery = await Lottery.deploy(emerald.address, beefyVault.address);
     await lottery.deployed();
 
-    const Usdc = await hre.ethers.getContractFactory("ERC20Mock");
-    usdc = await Usdc.deploy("USDC", "USDC", 100_000_000);
-    await usdc.deployed();
 
     // SETUP =============================================
     await emerald.transfer(lottery.address, totalEmeraldSupply);
