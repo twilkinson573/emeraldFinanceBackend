@@ -2,20 +2,19 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-import "./EmeraldToken.sol";
 import "./interfaces/beefy/IVaultV6.sol";
 
-contract Lottery is Ownable {
+contract Lottery is ERC20, Ownable {
 
-  EmeraldToken _emer;
   IERC20[] _acceptedERC20s;
   address _yieldVaultAddress;
 
-  constructor(address _emerAddress, address _initialYieldVaultAddress) {
-    _emer = EmeraldToken(_emerAddress);
+  // Create Emer token inline
+  constructor(address _initialYieldVaultAddress) public ERC20("EmeraldToken", "EMER") {
     _yieldVaultAddress = _initialYieldVaultAddress;
   }
 
@@ -35,27 +34,31 @@ contract Lottery is Ownable {
   }
 
 
-  // Deposits & Withdrawals ===================================================
+  // User Deposits & Withdrawals ==============================================
 
   function makeDeposit(uint256 _amount) public {
     require(getAcceptedERC20(0).allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
     require(getAcceptedERC20(0).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
 
-    require(_emer.transfer(msg.sender, _amount * 100), "EMER Transfer failed");
+    _mint(msg.sender, _amount);
+    // require(_mint(msg.sender, _amount), "EMER minting failed");
 
     getAcceptedERC20(0).approve(_yieldVaultAddress, _amount);
     _depositToVault(_amount);
     // require(_depositToVault(_amount), "Deposit to vault failed");
   }
 
-  function makeWithdrawal(uint256 _amount) public {
-    // Todo - probably need some calculations to work out what proportions of our mooToken vault shares we need to cash in
+  function makeWithdrawal(uint256 _shares) public {
     // require(_withdrawFromVault(_amount), "Withdraw from vault failed");
-    _withdrawFromVault(_amount);
-    require(_emer.allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
-    require(_emer.transferFrom(msg.sender, address(this), _amount * 100), "Transfer failed");
 
-    require(getAcceptedERC20(0).transfer(msg.sender, _amount), "ERC20 Transfer failed");
+    // Todo - need a calculation to work out what proportion of IOU token to sell to cover user withdrawal
+    _withdrawFromVault(_shares);
+    
+    // require(_emer.allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
+    _burn(msg.sender, _shares);
+    // require(_burn(msg.sender, _amount), "Emer burning failed");
+
+    require(getAcceptedERC20(0).transfer(msg.sender, _shares), "ERC20 Transfer failed");
   }
 
 
