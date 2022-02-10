@@ -2,7 +2,7 @@ const main = async () => {
 
   // VARS =============================================
 
-  const [deployer, bob] = await hre.ethers.getSigners();
+  const [deployer, bob, jane] = await hre.ethers.getSigners();
   const accountBalance = await deployer.getBalance();
   const totalEmeraldSupply = 100_000_000;
 
@@ -39,18 +39,17 @@ const main = async () => {
 
   // SETUP =============================================
 
-
   // Transfer Emerald Tokens to Lottery
   await emerald.transfer(lottery.address, totalEmeraldSupply);
-  // console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
-
-  // Fund Bob's account
-  const bobFundingAmount = 10_000;
-  // console.log(`Funding Bob's account with ${bobFundingAmount} USDC...`);
-  await usdc.transfer(bob.address, bobFundingAmount);
 
   // Add USDC to Lottery#acceptedERC20s
   await lottery.addAcceptedERC20(usdc.address);
+
+  // Fund Retail users' accounts
+  const bobFundingAmount = 10_000;
+  await usdc.transfer(bob.address, bobFundingAmount);
+  const janeFundingAmount = 10_000;
+  await usdc.transfer(jane.address, janeFundingAmount);
 
 
   // USER MAKES DEPOSIT ================================
@@ -58,12 +57,7 @@ const main = async () => {
   const approveUsdcTxn = await usdc.connect(bob).approve(lottery.address, 1_000_000);
   await approveUsdcTxn.wait();
 
-  console.log(" ");
-  let beefyVaultBalance = await beefyVault.balance();
-  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
-  let beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
-  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
-
+  await showBeefyStats(beefyVault);
 
   console.log(" ")
   const bobDepositAmount = 4000;
@@ -81,22 +75,15 @@ const main = async () => {
 
   console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
 
-  console.log(" ");
-  beefyVaultBalance = await beefyVault.balance();
-  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
-  beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
-  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
+  await showBeefyStats(beefyVault);
 
   // USER MAKES WITHDRAWAL =============================
 
   console.log("USDC is deposited into BeefyVault by strategy");
   // await usdc.transfer(beefyVault.address, 10_000);
 
-  console.log(" ");
-  beefyVaultBalance = await beefyVault.balance();
-  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
-  beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
-  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
+  await showBeefyStats(beefyVault);
+
   const approveEmerTxn = await emerald.connect(bob).approve(lottery.address, 1_000_000);
   await approveEmerTxn.wait();
 
@@ -106,22 +93,33 @@ const main = async () => {
   const withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
   await withdrawTxn.wait();
 
-  console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
-  console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+  await showRetailStats("Bob", bob, emerald, usdc);
+  await showRetailStats("Jane", jane, emerald, usdc);
 
+  await showLotteryStats(lottery, emerald, usdc, beefyVault);
+
+  await showBeefyStats(beefyVault);
+
+};
+
+async function showRetailStats (name, retailUser, emerald, usdc) {
+  console.log(" ");
+  console.log(`${name}'s EMER balance:`, await emerald.balanceOf(retailUser.address))
+  console.log(`${name}'s USDC balance:`, await usdc.balanceOf(retailUser.address))
+}
+
+async function showLotteryStats (lottery, emerald, usdc, beefyVault) {
+  console.log(" ");
   console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Lottery's mooScreamUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
+}
 
-  console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
-
+async function showBeefyStats (beefyVault) {
   console.log(" ");
-  beefyVaultBalance = await beefyVault.balance();
-  console.log("BeefyVault USDC reserve balance", beefyVaultBalance);
-  beefyVaultPricePerFullShare = await beefyVault.getPricePerFullShare();
-  console.log("BeefyVault Price Per Full IOU Token Share", beefyVaultPricePerFullShare);
-
-};
+  console.log("BeefyVault USDC reserve balance", await beefyVault.balance());
+  console.log("BeefyVault Price Per Full IOU Token Share", await beefyVault.getPricePerFullShare());
+}
 
 
 const runMain = async () => {
