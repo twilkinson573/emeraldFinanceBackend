@@ -61,26 +61,23 @@ const main = async () => {
 
   console.log(" ")
   const bobDepositAmount = 4000;
-  console.log(`## TX: Bob making USDC deposit of ${bobDepositAmount} to Lottery...`);
+  console.log(`########## TX: Bob deposit ${bobDepositAmount} USDC to Lottery...`);
   const depositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
   await depositTxn.wait();
 
 
-  console.log("Bob's EMER balance:", await emerald.balanceOf(bob.address));
-  console.log("Bob's USDC balance:", await usdc.balanceOf(bob.address));
+  await showRetailStats("Bob", bob, emerald, usdc);
+  await showRetailStats("Jane", jane, emerald, usdc);
 
-  console.log("Lottery EMER balance:", await emerald.balanceOf(lottery.address));
-  console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
-  console.log("Lottery's mooScreamUSDC IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
-
-  console.log("Beefy Vault's USDC balance:", await usdc.balanceOf(beefyVault.address));
+  await showLotteryStats(lottery, emerald, usdc, beefyVault);
 
   await showBeefyStats(beefyVault);
 
   // USER MAKES WITHDRAWAL =============================
 
-  console.log("USDC is deposited into BeefyVault by strategy");
-  // await usdc.transfer(beefyVault.address, 10_000);
+  console.log(" ")
+  console.log("########## Strategy deposits USDC Rewards into BeefyVault");
+  await usdc.transfer(beefyVault.address, 1000);
 
   await showBeefyStats(beefyVault);
 
@@ -89,7 +86,7 @@ const main = async () => {
 
   console.log(" ")
   const bobWithdrawalAmount = 2000;
-  console.log(`## TX: Bob making a small USDC withdrawal of ${bobWithdrawalAmount} from Lottery...`);
+  console.log(`########## TX: Bob withdraw ${bobWithdrawalAmount} USDC from Lottery...`);
   const withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
   await withdrawTxn.wait();
 
