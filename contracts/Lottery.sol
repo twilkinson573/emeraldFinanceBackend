@@ -18,6 +18,14 @@ contract Lottery is ERC721URIStorage, Ownable {
   IERC20[] _acceptedWants;
   address _yieldVaultAddress;
 
+  struct LotteryTicketMeta {
+    uint depositSize;
+    uint depositDate;
+  }
+
+  // TODO2 - remove public modifier (just for dev -> inspection)
+  mapping(uint => LotteryTicketMeta) public lotteryTickets;
+
   constructor(address _initialYieldVaultAddress) ERC721("Emerald Ticket", "EMT") {
     _yieldVaultAddress = _initialYieldVaultAddress;
   }
@@ -43,15 +51,17 @@ contract Lottery is ERC721URIStorage, Ownable {
     require(getAcceptedWant(0).allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
     require(getAcceptedWant(0).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
 
-
     getAcceptedWant(0).approve(_yieldVaultAddress, _amount);
     _depositToVault(_amount);
     // require(_depositToVault(_amount), "Deposit to vault failed");
 
     // TODO1 - NFT ticket minting here
+
     _ticketIds.increment();
     uint256 newTicketId = _ticketIds.current();
     _mint(msg.sender, newTicketId);
+    lotteryTickets[newTicketId] = LotteryTicketMeta(_amount, block.timestamp);
+
     // _setTokenURI(newItemId, tokenURI);
   }
 
