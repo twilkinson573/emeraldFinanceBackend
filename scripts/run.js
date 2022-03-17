@@ -31,7 +31,7 @@ const main = async () => {
   // SETUP =============================================
 
   // Add USDC to Lottery#acceptedERC20s
-  await lottery.addAcceptedERC20(usdc.address);
+  await lottery.addAcceptedWant(usdc.address);
 
   // Fund Retail users' accounts
   const bobFundingAmount = 10_000;
@@ -95,13 +95,13 @@ const main = async () => {
 
 async function showRetailStats (name, retailUser, lottery, usdc) {
   console.log(" ");
-  console.log(`${name}'s EMER balance:`, await lottery.balanceOf(retailUser.address))
+  // TODO1 - Show user's NFT ticket with amount deposited here
   console.log(`${name}'s USDC balance:`, await usdc.balanceOf(retailUser.address))
 }
 
 async function showLotteryStats (lottery, usdc, beefyVault) {
   console.log(" ");
-  console.log("Lottery total supply of EMER:", await lottery.totalSupply());
+  // TODO1 - Show all NFT tickets here
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Lottery IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
 }
