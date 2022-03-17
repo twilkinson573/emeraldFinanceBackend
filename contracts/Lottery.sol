@@ -3,16 +3,22 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+
 import "hardhat/console.sol";
 
 import "./interfaces/beefy/IVaultV6.sol";
 
-contract Lottery is Ownable {
+contract Lottery is ERC721URIStorage, Ownable {
+  using Counters for Counters.Counter;
+  Counters.Counter private _ticketIds;
 
   IERC20[] _acceptedWants;
   address _yieldVaultAddress;
 
-  constructor(address _initialYieldVaultAddress) {
+  constructor(address _initialYieldVaultAddress) ERC721("Emerald Ticket", "EMT") {
     _yieldVaultAddress = _initialYieldVaultAddress;
   }
 
@@ -37,11 +43,16 @@ contract Lottery is Ownable {
     require(getAcceptedWant(0).allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
     require(getAcceptedWant(0).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
 
-    // TODO1 - NFT ticket minting here
 
     getAcceptedWant(0).approve(_yieldVaultAddress, _amount);
     _depositToVault(_amount);
     // require(_depositToVault(_amount), "Deposit to vault failed");
+
+    // TODO1 - NFT ticket minting here
+    _ticketIds.increment();
+    uint256 newTicketId = _ticketIds.current();
+    _mint(msg.sender, newTicketId);
+    // _setTokenURI(newItemId, tokenURI);
   }
 
   function makeWithdrawal(uint256 _shares) public {
