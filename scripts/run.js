@@ -55,8 +55,8 @@ const main = async () => {
   const bobDepositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
   await bobDepositTxn.wait();
 
-  await showRetailStats("Bob", bob, lottery, usdc);
-  await showRetailStats("Jane", jane, lottery, usdc);
+  await showRetailUserStats("Bob", bob, lottery, usdc);
+  await showRetailUserStats("Jane", jane, lottery, usdc);
   await showLotteryStats(lottery, usdc, beefyVault);
   await showBeefyStats(beefyVault);
 
@@ -67,8 +67,11 @@ const main = async () => {
   const janeDepositTxn = await lottery.connect(jane).makeDeposit(janeDepositAmount);
   await janeDepositTxn.wait();
 
-  await showRetailStats("Bob", bob, lottery, usdc);
-  await showRetailStats("Jane", jane, lottery, usdc);
+  const janeDepositTxn1 = await lottery.connect(jane).makeDeposit(janeDepositAmount * 2);
+  await janeDepositTxn1.wait();
+
+  await showRetailUserStats("Bob", bob, lottery, usdc);
+  await showRetailUserStats("Jane", jane, lottery, usdc);
   await showLotteryStats(lottery, usdc, beefyVault);
   await showBeefyStats(beefyVault);
 
@@ -86,22 +89,31 @@ const main = async () => {
   const withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
   await withdrawTxn.wait();
 
-  await showRetailStats("Bob", bob, lottery, usdc);
-  await showRetailStats("Jane", jane, lottery, usdc);
+  await showRetailUserStats("Bob", bob, lottery, usdc);
+  await showRetailUserStats("Jane", jane, lottery, usdc);
   await showLotteryStats(lottery, usdc, beefyVault);
   await showBeefyStats(beefyVault);
 
 };
 
-async function showRetailStats (name, retailUser, lottery, usdc) {
+async function showRetailUserStats (name, retailUser, lottery, usdc) {
   console.log(" ");
   // TODO1 - Show user's NFT ticket with amount deposited here
+  // loop through a user's tokens and show each one plus metadata
+  let retailUserBalance = await lottery.balanceOf(retailUser.address);
+  console.log(`${name}'s lottery tickets count:`, retailUserBalance);
+
+  for (let i=0; i < retailUserBalance; i++) {
+    let userTicket = await lottery.tokenOfOwnerByIndex(retailUser.address, i);
+    console.log(`Ticket ${userTicket}:`, await lottery.lotteryTickets(userTicket));
+  }
+
   console.log(`${name}'s USDC balance:`, await usdc.balanceOf(retailUser.address))
 }
 
 async function showLotteryStats (lottery, usdc, beefyVault) {
   console.log(" ");
-  // TODO1 - Show all NFT tickets here
+  console.log("Lottery Tickets Count:", await lottery.totalSupply());
   console.log("Lottery USDC balance:", await usdc.balanceOf(lottery.address));
   console.log("Lottery IOU vault token balance:", await beefyVault.balanceOf(lottery.address));
 }
