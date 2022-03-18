@@ -84,9 +84,9 @@ const main = async () => {
   await showBeefyStats(beefyVault);
 
   console.log(" ")
-  const bobWithdrawalAmount = 2000;
-  console.log(`########## TX: Bob withdraw ${bobWithdrawalAmount} USDC from Lottery...`);
-  const withdrawTxn = await lottery.connect(bob).makeWithdrawal(bobWithdrawalAmount);
+  let bobTicketId = await lottery.tokenOfOwnerByIndex(bob.address, 0) 
+  console.log(`########## TX: Bob withdrawing ticket #${bobTicketId} from Lottery...`);
+  const withdrawTxn = await lottery.connect(bob).withdrawTicket(bobTicketId);
   await withdrawTxn.wait();
 
   await showRetailUserStats("Bob", bob, lottery, usdc);
@@ -98,8 +98,6 @@ const main = async () => {
 
 async function showRetailUserStats (name, retailUser, lottery, usdc) {
   console.log(" ");
-  // TODO1 - Show user's NFT ticket with amount deposited here
-  // loop through a user's tokens and show each one plus metadata
   let retailUserBalance = await lottery.balanceOf(retailUser.address);
   console.log(`${name}'s lottery tickets count:`, retailUserBalance);
 
