@@ -90,13 +90,14 @@ contract Lottery is ERC721URIStorage, Ownable {
 
   // Yield Farming ============================================================
 
-  function _depositToVault(uint256 _amount) internal {
-    IVaultV6(_yieldVaultAddress).deposit(_amount);
+  function _depositToVault(uint256 _depositAmount) internal {
+    IVaultV6(_yieldVaultAddress).deposit(_depositAmount);
   }
 
   // 
-  function _withdrawFromVault(uint256 _shares) internal {
-    IVaultV6(_yieldVaultAddress).withdraw(_shares);
+  function _withdrawFromVault(uint256 _withdrawalAmount) internal {
+    uint pricePerFullShare = IVaultV6(_yieldVaultAddress).getPricePerFullShare();
+    IVaultV6(_yieldVaultAddress).withdraw(_withdrawalAmount / pricePerFullShare);
   }
 
 

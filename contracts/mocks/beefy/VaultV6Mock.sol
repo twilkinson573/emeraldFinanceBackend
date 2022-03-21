@@ -28,7 +28,7 @@ contract VaultV6Mock is ERC20, Ownable {
         string memory _name,
         string memory _symbol,
         address _wantToken 
-    ) public ERC20(
+    ) ERC20(
         _name,
         _symbol
     ) {
@@ -61,7 +61,6 @@ contract VaultV6Mock is ERC20, Ownable {
     function getPricePerFullShare() public view returns (uint256) {
         return totalSupply() == 0 ? 1e18 : (balance() * 1e18) / (totalSupply());
     }
-
 
     /**
      * @dev The entrypoint of funds into the system. People deposit with this function
