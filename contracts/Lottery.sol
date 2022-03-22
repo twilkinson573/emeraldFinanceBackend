@@ -80,11 +80,29 @@ contract Lottery is ERC721URIStorage, Ownable {
 
     uint _depositSize = lotteryTickets[_tokenId].depositSize;
     _burn(_tokenId);
-    _withdrawFromVault(_depositSize);
-    require(getAcceptedWant(0).transfer(msg.sender, _depositSize), "Want Token Transfer failed");
 
-    // TODO2 - we need a calculation to work out what proportion of IOU token to sell to cover user withdrawal
-    // TODO2 -  withdrawFromVault the appropriate amount of shares
+    uint totSup = IVaultV6(_yieldVaultAddress).totalSupply();
+    console.log("Total Supply:");
+    console.log(totSup);
+
+    uint balance = IVaultV6(_yieldVaultAddress).balance();
+    console.log("Balance:");
+    console.log(balance);
+
+
+    uint pricePerFullShare = IVaultV6(_yieldVaultAddress).totalSupply() == 0 ? 1 : IVaultV6(_yieldVaultAddress).balance() * 1e18 / (IVaultV6(_yieldVaultAddress).totalSupply());
+    console.log("Price per full mooScreamUSDC share:");
+    console.log(pricePerFullShare);
+
+    uint _withdrawalShares = _depositSize / pricePerFullShare;
+
+    console.log("Must return USDC:");
+    console.log(_depositSize);
+    console.log("Withdrawing shares:");
+    console.log(_withdrawalShares);
+
+    _withdrawFromVault(_withdrawalShares);
+    require(getAcceptedWant(0).transfer(msg.sender, _depositSize), "Want Token Transfer failed");
   }
 
 
@@ -94,10 +112,8 @@ contract Lottery is ERC721URIStorage, Ownable {
     IVaultV6(_yieldVaultAddress).deposit(_depositAmount);
   }
 
-  // 
-  function _withdrawFromVault(uint256 _withdrawalAmount) internal {
-    uint pricePerFullShare = IVaultV6(_yieldVaultAddress).getPricePerFullShare();
-    IVaultV6(_yieldVaultAddress).withdraw(_withdrawalAmount / pricePerFullShare);
+  function _withdrawFromVault(uint256 _withdrawalShares) internal {
+    IVaultV6(_yieldVaultAddress).withdraw(_withdrawalShares);
   }
 
 
