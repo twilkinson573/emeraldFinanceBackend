@@ -94,7 +94,7 @@ contract Lottery is ERC721URIStorage, Ownable {
     console.log("Price per full mooScreamUSDC share:");
     console.log(pricePerFullShare);
 
-    uint _withdrawalShares = _depositSize / pricePerFullShare;
+    uint _withdrawalShares = _depositSize * 1e18 / pricePerFullShare;
 
     console.log("Must return USDC:");
     console.log(_depositSize);

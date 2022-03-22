@@ -12,7 +12,7 @@ const main = async () => {
   // DEPLOY CONTRACTS =================================
 
   const Usdc = await hre.ethers.getContractFactory("ERC20Mock");
-  const usdc = await Usdc.deploy("USDC", "USDC", ethers.BigNumber.from("1000000000000000000000000"));
+  const usdc = await Usdc.deploy("USDC", "USDC", ethers.utils.parseUnits("1000000.0"));
   await usdc.deployed();
 
   // console.log("USDC deployed to:", usdc.address);
@@ -37,24 +37,24 @@ const main = async () => {
   await lottery.addAcceptedWant(usdc.address);
 
   // Fund Retail users' accounts
-  const bobFundingAmount = ethers.BigNumber.from("100000000000000000000000");
+  const bobFundingAmount = ethers.utils.parseUnits("10000.0");
   await usdc.transfer(bob.address, bobFundingAmount);
-  const janeFundingAmount = ethers.BigNumber.from("10000000000000000000000");
+  const janeFundingAmount = ethers.utils.parseUnits("10000.0");
   await usdc.transfer(jane.address, janeFundingAmount);
 
 
   // USER MAKES DEPOSIT ================================
 
-  const bobApproveUsdcTxn = await usdc.connect(bob).approve(lottery.address, ethers.BigNumber.from("1000000000000000000000000"));
+  const bobApproveUsdcTxn = await usdc.connect(bob).approve(lottery.address, ethers.utils.parseUnits("1000000.0"));
   await bobApproveUsdcTxn.wait();
-  const janeApproveUsdcTxn = await usdc.connect(jane).approve(lottery.address, ethers.BigNumber.from("1000000000000000000000000"));
+  const janeApproveUsdcTxn = await usdc.connect(jane).approve(lottery.address, ethers.utils.parseUnits("1000000.0"));
   await janeApproveUsdcTxn.wait();
 
   await showBeefyStats(beefyVault);
 
   console.log(" ")
-  const bobDepositAmount = ethers.BigNumber.from("400000000000000000000");
-  console.log(`########## TX: Bob deposit ${bobDepositAmount} USDC to Lottery...`);
+  const bobDepositAmount = ethers.utils.parseUnits("4000.0");
+  console.log(`########## TX: Bob deposit ${ethers.utils.formatEther(bobDepositAmount)} USDC to Lottery...`);
   const bobDepositTxn = await lottery.connect(bob).makeDeposit(bobDepositAmount);
   await bobDepositTxn.wait();
 
@@ -65,12 +65,12 @@ const main = async () => {
 
 
   console.log(" ")
-  const janeDepositAmount = ethers.BigNumber.from("100000000000000000000");
-  console.log(`########## TX: Jane deposit ${janeDepositAmount} USDC to Lottery...`);
+  const janeDepositAmount = ethers.utils.parseUnits("1000.0");
+  console.log(`########## TX: Jane deposit ${ethers.utils.formatEther(janeDepositAmount)} USDC to Lottery...`);
   const janeDepositTxn = await lottery.connect(jane).makeDeposit(janeDepositAmount);
   await janeDepositTxn.wait();
 
-  const janeDepositTxn1 = await lottery.connect(jane).makeDeposit("200000000000000000000");
+  const janeDepositTxn1 = await lottery.connect(jane).makeDeposit(ethers.utils.parseUnits("2000.0"));
   await janeDepositTxn1.wait();
 
   await showRetailUserStats("Bob", bob, lottery, usdc);
@@ -81,8 +81,9 @@ const main = async () => {
   // USER MAKES WITHDRAWAL =============================
 
   console.log(" ")
-  console.log("########## MOCK: Strategy deposits USDC Rewards into BeefyVault");
-  await usdc.transfer(beefyVault.address, ethers.BigNumber.from("10000000000000000000"));
+  const rewardAmount = ethers.utils.parseUnits("1000.0")
+  console.log(`######### MOCK: Yield farming strategy deposits ${ethers.utils.formatEther(rewardAmount)} USDC into vault`)
+  await usdc.transfer(beefyVault.address, rewardAmount);
 
   await showBeefyStats(beefyVault);
 
